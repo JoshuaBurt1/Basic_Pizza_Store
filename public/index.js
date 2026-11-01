@@ -1,280 +1,401 @@
-//tags
-const price = document.getElementById("price");
-const items = [0, 0, 0, 0];
-//fields
-const pizzaForm = document.querySelector("#pizzaForm");
-const sizeSelect = document.querySelector("#sizeSelect");
-const dipSelect = document.querySelector("#dipSelect");
-const sideSelect = document.querySelector("#sideSelect");
-
-const toppingSelectC = document.getElementById("toppingSelectC");
-const toppingArray = [];
-const toppingListC = [
-  "none : $0",
-  "olive : $1",
-  "pepper : $2",
-  "pineapple : $2",
-  "ham : $3",
-  "pepperoni : $3",
-  "bacon : $4",
-  "extra cheese : $5",
+// Data Schema
+const SIZES = [
+  { label: "Select Pizza Size...", name: "", price: 0 },
+  { label: "Small ($10.00)", name: "Small Pizza", price: 10 },
+  { label: "Medium ($12.00)", name: "Medium Pizza", price: 12 },
+  { label: "Large ($15.00)", name: "Large Pizza", price: 15 },
+  { label: "Extra Large ($20.00)", name: "Extra Large Pizza", price: 20 },
+  { label: "Panzerotti ($14.00)", name: "Panzerotti", price: 14 },
 ];
 
+const TOPPINGS = [
+  { id: "top_0", name: "Olive", price: 1.0 },
+  { id: "top_1", name: "Pepper", price: 2.0 },
+  { id: "top_2", name: "Pineapple", price: 2.0 },
+  { id: "top_3", name: "Ham", price: 3.0 },
+  { id: "top_4", name: "Pepperoni", price: 3.0 },
+  { id: "top_5", name: "Bacon", price: 4.0 },
+  { id: "top_6", name: "Extra Cheese", price: 5.0 },
+];
 
-//SIZE: function to populate size drop-down menu
-function addSize() {
-  var sizeList = [
-    "none : $0",
-    "small : $10",
-    "medium : $12",
-    "large : $15",
-    "extra large : $20",
-    "panzerotti : $14",
-  ];
-  if (sizeSelect.length <= sizeList.length) {
-    for (let i = 0; i < sizeList.length; i++) {
-      var option = document.createElement("option");
-      option.textContent = sizeList[i];
-      option.id = sizeList[i];
-      sizeSelect.appendChild(option);
-    }
-  }
-}
+const DIPS = [
+  { label: "Select Dip...", name: "", price: 0 },
+  { label: "Jalapeno ($0.50)", name: "Jalapeno Dip", price: 0.5 },
+  { label: "Habanero ($0.50)", name: "Habanero Dip", price: 0.5 },
+  { label: "Ghost Pepper ($0.50)", name: "Ghost Pepper Dip", price: 0.5 },
+  { label: "Ranch ($0.50)", name: "Ranch Dip", price: 0.5 },
+  { label: "Three Cheese ($0.50)", name: "Three Cheese Dip", price: 0.5 },
+  { label: "Sweet & Sour ($0.50)", name: "Sweet & Sour Dip", price: 0.5 },
+  { label: "Plum ($0.50)", name: "Plum Dip", price: 0.5 },
+];
 
-// Toppings: Create and append checkBox buttons
-toppingListC.forEach((topping, index) => {
-  const checkBox = document.createElement("input");
-  checkBox.type = "checkbox";
-  checkBox.value = topping.toLowerCase();
-  checkBox.id = index;
+const SIDES = [
+  { label: "Select Side...", name: "", price: 0 },
+  { label: "Chicken Wings ($10.00)", name: "Chicken Wings", price: 10 },
+  { label: "Chicken Bites ($12.00)", name: "Chicken Bites", price: 12 },
+  { label: "Garlic Bread ($6.00)", name: "Garlic Bread", price: 6 },
+  { label: "Cheese Bread ($7.00)", name: "Cheese Bread", price: 7 },
+  { label: "Mozzarella Sticks ($8.00)", name: "Mozzarella Sticks", price: 8 },
+];
 
-  const label = document.createElement("label");
-  label.textContent = topping;
+const BEVERAGES = [
+  { label: "Select Beverage...", name: "", price: 0 },
+  { label: "Coca-Cola ($2.50)", name: "Coca-Cola", price: 2.50 },
+  { label: "Diet Coke ($2.50)", name: "Diet Coke", price: 2.50 },
+  { label: "Sprite ($2.50)", name: "Sprite", price: 2.50 },
+  { label: "Iced Tea ($2.75)", name: "Iced Tea", price: 2.75 },
+  { label: "Sparkling Water ($3.00)", name: "Sparkling Water", price: 3.00 },
+];
 
-  toppingSelectC.appendChild(checkBox);
-  toppingSelectC.appendChild(label);
-  toppingSelectC.appendChild(document.createElement("br"));
-});
+const DESSERTS = [
+  { label: "Select Dessert...", name: "", price: 0 },
+  { label: "Chocolate Lava Cake ($6.50)", name: "Chocolate Lava Cake", price: 6.50 },
+  { label: "Cinnamon Sticks ($5.00)", name: "Cinnamon Sticks", price: 5.00 },
+  { label: "Cannoli (2 Pack) ($5.50)", name: "Cannoli (2 Pack)", price: 5.50 },
+  { label: "Tiramisu Slice ($6.00)", name: "Tiramisu Slice", price: 6.00 },
+  { label: "Apple Pie ($4.00)", name: "Apple Pie", price: 4.00 },
+];
 
-// Get references to checkBox elements
-const toppingCBs = Array.from({ length: toppingListC.length }, (_, index) =>
-  document.getElementById(index.toString())
-);
+const MAX_QTY_PER_ITEM = 5;
+let orderCart = [];
 
-// Add or remove toppings from the array
-function addToppingC() {
-  toppingArray.length = 0; // Clear the array
-  for (let i = 0; i < toppingCBs.length; i++) {
-    if (toppingCBs[i].checked) {
-      toppingArray.push(" " + toppingCBs[i].value);
-    }
-  }
-  console.log("ToppingArray: " + toppingArray);
-  // String manipulations
-  const toppingString = toppingArray.toString().replace(/[:]+/g, "");
-  // Topping sum calculation
-  const numArray = toppingString.split(/[a-zA-Z$\s.]+/).filter(Boolean);
-  const toppingSum = numArray.reduce((acc, num) => acc + parseInt(num), 0);
-  items[1] = toppingSum;
-}
+// DOM Elements
+const pizzaForm = document.getElementById("pizzaForm");
+const customerSelect = document.getElementById("customerSelect");
 
-//DIPLIST: function to populate dipList
-function addDip() {
-  var dipList = [
-    "none : $0",
-    "jalapeno : $0.50",
-    "habanero : $0.50",
-    "ghost pepper : $0.50",
-    "ranch : $0.50",
-    "three cheese : $0.50",
-    "sweet & sour : $0.50",
-    "plum : $0.50",
-  ];
-  if (dipSelect.length <= dipList.length) {
-    for (let j = 0; j < dipList.length; j++) {
-      var option = document.createElement("option");
-      option.textContent = dipList[j];
-      option.id = dipList[j];
-      dipSelect.appendChild(option);
-    }
-  }
-}
+const sizeSelect = document.getElementById("sizeSelect");
+const sizeQty = document.getElementById("sizeQty");
+const addPizzaBtn = document.getElementById("addPizzaBtn");
 
-//SIDELIST: function to populate sideList
-function addSide() {
-  var sideList = [
-    "none : $0",
-    "chicken wings : $10",
-    "chicken bites : $12",
-    "garlic bread : $6",
-    "cheese bread : $7",
-    "mozarella sticks : $8",
-    "apple pie : $4",
-  ];
-  if (sideSelect.length <= sideList.length) {
-    for (let k = 0; k < sideList.length; k++) {
-      var option = document.createElement("option");
-      option.textContent = sideList[k];
-      option.id = sideList[k];
-      sideSelect.appendChild(option);
-    }
-  }
-}
+const dipSelect = document.getElementById("dipSelect");
+const dipQty = document.getElementById("dipQty");
+const addDipBtn = document.getElementById("addDipBtn");
 
-// Part 6: Create a class for the Pizza object, using the parameters from the order form you just created.
-sizeSelect.addEventListener("click", addSize);
-dipSelect.addEventListener("click", addDip);
-sideSelect.addEventListener("click", addSide);
+const sideSelect = document.getElementById("sideSelect");
+const sideQty = document.getElementById("sideQty");
+const addSideBtn = document.getElementById("addSideBtn");
 
-sizeSelect.addEventListener("change", function () {
-  const selectedSize = sizeSelect.value.split(" : $");
-  //console.log(size.textContent);
-  items[0] = Number(selectedSize[1]);
-});
+const beverageSelect = document.getElementById("beverageSelect");
+const beverageQty = document.getElementById("beverageQty");
+const addBeverageBtn = document.getElementById("addBeverageBtn");
 
-toppingCBs.forEach((checkBox) => {
-  checkBox.addEventListener("click", addToppingC);
-});
+const dessertSelect = document.getElementById("dessertSelect");
+const dessertQty = document.getElementById("dessertQty");
+const addDessertBtn = document.getElementById("addDessertBtn");
 
-dipSelect.addEventListener("change", function () {
-  const selectedDip = dipSelect.value.split(" : $");
-  items[2] = Number(selectedDip[1]);
-});
-sideSelect.addEventListener("change", function () {
-  const selectedSide = sideSelect.value.split(" : $");
-  items[3] = Number(selectedSide[1]);
-});
+const toppingContainer = document.getElementById("toppingSelectC");
+const summaryContent = document.getElementById("summaryContent");
+const priceDisplay = document.getElementById("priceDisplay");
+const message = document.getElementById("message");
+const clearBtn = document.querySelector(".clear");
 
-//fields
-const message = document.querySelector("#message");
-const view = document.querySelector(".view");
-const clear = document.querySelector(".clear");
-
-var pizzaCostArray = [];
-
-/* Pizza constructor*/
-class Pizza {
-  customer;
-  size;
-  toppingC;
-  dip;
-  side;
-
-  constructor(customer, size, toppingC, dip, side) {
-    this.customer = customer;
-    this.size = size;
-    this.toppingC = toppingC;
-    this.dip = dip;
-    this.side = side;
-  }
-  //messages to assist customer
-  description() {
-    let sum = 0;
-
-    if (this.customer == "") {
-      message.textContent = "Please enter your name";
-    } else if (this.size == "") {
-      message.textContent = "Please select a size";
-    } else if (this.toppingC == "") {
-      message.textContent = "Please select a topping";
-    } else if (this.dip == "") {
-      message.textContent = "Please select a dip";
-    } else if (this.side == "") {
-      message.textContent = "Please select a side";
-    } else {
-      message.textContent = "";
-      for (let i = 0; i < items.length; i += 1) {
-        sum += items[i];
-      }
-      if (sum == 0) {
-        message.textContent = "You ordered nothing. Check your order and try again";
-      } else {
-        message.textContent = `${this.customer}'s order: a ${this.size} ${this.toppingC} pizza with ${this.dip} dip, & a ${this.side} side.`;
-      }
-      price.textContent = "Total cost: $" + sum;
-    }
-  }
-}
-
-var customerPizza;
-//this Pizza object needs to be instantiated for description() messages to occur in <p id="message"></p>
-function viewOrder() {
-  let customerName = document.getElementById("customerSelect").value;
-  let pizzaSize = document.getElementById("sizeSelect").value;
-  // Retrieve selected toppings
-  let selectedToppings = [];
-  let toppingSelectC = document.getElementById("toppingSelectC");
-  let toppingOptions = toppingSelectC.querySelectorAll('input[type="checkbox"]:checked');
-  toppingOptions.forEach(option => {
-    // Remove amounts from toppings
-    let toppingLabel = option.nextElementSibling.textContent;
-    let toppingName = toppingLabel.replace(/:\s*\$[\d.]+/, "");
-    selectedToppings.push(toppingName);
+// Populate Select Menus
+function populateSelect(element, items) {
+  element.innerHTML = "";
+  items.forEach((item, index) => {
+    const opt = document.createElement("option");
+    opt.value = index;
+    opt.textContent = item.label;
+    element.appendChild(opt);
   });
-  let pizzaToppings = selectedToppings.join(", ");
-  let pizzaDip = document.getElementById("dipSelect").value;
-  let pizzaSide = document.getElementById("sideSelect").value;
-  // Remove amounts from other values
-  customerName = customerName.replace(/:\s*\$[\d.]+/, "");
-  pizzaSize = pizzaSize.replace(/:\s*\$[\d.]+/, "");
-  pizzaDip = pizzaDip.replace(/:\s*\$[\d.]+/, "");
-  pizzaSide = pizzaSide.replace(/:\s*\$[\d.]+/, "");
-  customerPizza = new Pizza(customerName, pizzaSize, pizzaToppings, pizzaDip, pizzaSide);
-  customerPizza.description();
 }
 
-//function that creates an instance of Pizza using user selected values
-function enterOrder() {
-  pizzaCostArray = [
-    items[0], // pizza size cost
-    items[1], // topping cost
-    items[2], // dip cost
-    items[3], // side cost
-  ];
-  // Map the pizzaCostArray elements to the correct orderItems format
-  const orderItems = [
-    { id: 1, name: "Pizza Size", priceInCents: pizzaCostArray[0] * 100, quantity: 1 }, // pizza size cost
-    { id: 2, name: "Topping", priceInCents: pizzaCostArray[1] * 100, quantity: 1 }, // topping cost
-    { id: 3, name: "Dip", priceInCents: pizzaCostArray[2] * 100, quantity: 1 }, // dip cost
-    { id: 4, name: "Side", priceInCents: pizzaCostArray[3] * 100, quantity: 1 }, // side cost
-  ];
+// Populate Toppings
+function renderToppings() {
+  toppingContainer.innerHTML = "";
+  TOPPINGS.forEach((topping) => {
+    const chip = document.createElement("div");
+    chip.className = "topping-pill";
 
-  // Continue with the rest of your code
-  fetch("https://pizza-store-example.onrender.com/checkout", { // ### Adjust url as needed ###
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      items: orderItems,
-    }),
-  })
-    .then(res => {
-      if (res.ok) return res.json();
-      return res.json().then(json => Promise.reject(json));
-    })
-    .then(({ url }) => {
-      window.location = url;
-    })
-    .catch(e => {
-      console.error(e.error);
+    chip.innerHTML = `
+      <input type="checkbox" id="${topping.id}" value="${topping.id}">
+      <label for="${topping.id}">+ ${topping.name} ($${topping.price.toFixed(2)})</label>
+    `;
+    toppingContainer.appendChild(chip);
+  });
+}
+
+// Init Options
+populateSelect(sizeSelect, SIZES);
+populateSelect(dipSelect, DIPS);
+populateSelect(sideSelect, SIDES);
+populateSelect(beverageSelect, BEVERAGES);
+populateSelect(dessertSelect, DESSERTS);
+renderToppings();
+
+function parseQty(inputEl) {
+  let val = parseInt(inputEl.value, 10);
+  if (isNaN(val) || val < 1) val = 1;
+  if (val > MAX_QTY_PER_ITEM) val = MAX_QTY_PER_ITEM;
+  inputEl.value = val;
+  return val;
+}
+
+function showMessage(msg, type = "info") {
+  message.className = `mt-2 small mb-0 text-${type}`;
+  message.textContent = msg;
+}
+
+function getItemTotalQty(itemName) {
+  return orderCart
+    .filter(item => item.name === itemName)
+    .reduce((sum, item) => sum + item.quantity, 0);
+}
+
+// Add Item Handler
+function addItemToCart(itemObj, quantity, details = "") {
+  if (!itemObj || !itemObj.name) {
+    showMessage("Please select a valid item.", "warning");
+    return;
+  }
+
+  const currentTotal = getItemTotalQty(itemObj.name);
+  if (currentTotal >= MAX_QTY_PER_ITEM) {
+    showMessage(`Maximum limit of ${MAX_QTY_PER_ITEM} reached for ${itemObj.name}.`, "warning");
+    return;
+  }
+
+  const allowedQty = Math.min(quantity, MAX_QTY_PER_ITEM - currentTotal);
+  if (allowedQty < quantity) {
+    showMessage(`Added ${allowedQty}x ${itemObj.name} (capped at max limit of ${MAX_QTY_PER_ITEM}).`, "warning");
+  } else {
+    showMessage(`Added ${allowedQty}x ${itemObj.name} to your order.`, "success");
+  }
+
+  const existingItemIndex = orderCart.findIndex(
+    item => item.name === itemObj.name && item.details === details
+  );
+
+  if (existingItemIndex > -1) {
+    orderCart[existingItemIndex].quantity += allowedQty;
+  } else {
+    orderCart.push({
+      id: Date.now() + Math.random(),
+      name: itemObj.name,
+      price: itemObj.price,
+      quantity: allowedQty,
+      details: details
     });
+  }
+
+  updateSummary();
 }
 
-function clearOrder() {
-  toppingCBs.forEach((checkBox) => {
-    checkBox.checked = false;
+// Button Event Listeners
+addPizzaBtn.addEventListener("click", () => {
+  const selectedSize = SIZES[sizeSelect.value];
+  if (!selectedSize || !selectedSize.name) {
+    showMessage("Please select a pizza size first.", "warning");
+    return;
+  }
+
+  const selectedToppings = [];
+  TOPPINGS.forEach((t) => {
+    const cb = document.getElementById(t.id);
+    if (cb && cb.checked) selectedToppings.push(t);
   });
-  message.textContent = "";
-  price.textContent = "";
+
+  const toppingPrice = selectedToppings.reduce((sum, t) => sum + t.price, 0);
+  const pizzaUnitPrice = selectedSize.price + toppingPrice;
+  const qty = parseQty(sizeQty);
+  const toppingsText = selectedToppings.length > 0
+    ? selectedToppings.map(t => t.name).join(", ")
+    : "Plain Cheese";
+
+  addItemToCart(
+    { name: selectedSize.name, price: pizzaUnitPrice },
+    qty,
+    `Toppings: ${toppingsText}`
+  );
+
+  sizeSelect.value = 0;
+  sizeQty.value = 1;
+  document.querySelectorAll('#toppingSelectC input[type="checkbox"]').forEach(cb => cb.checked = false);
+});
+
+addDipBtn.addEventListener("click", () => {
+  const selected = DIPS[dipSelect.value];
+  if (!selected || !selected.name) {
+    showMessage("Please select a dip.", "warning");
+    return;
+  }
+  const qty = parseQty(dipQty);
+  addItemToCart(selected, qty);
+  dipSelect.value = 0;
+  dipQty.value = 1;
+});
+
+addSideBtn.addEventListener("click", () => {
+  const selected = SIDES[sideSelect.value];
+  if (!selected || !selected.name) {
+    showMessage("Please select a side.", "warning");
+    return;
+  }
+  const qty = parseQty(sideQty);
+  addItemToCart(selected, qty);
+  sideSelect.value = 0;
+  sideQty.value = 1;
+});
+
+addBeverageBtn.addEventListener("click", () => {
+  const selected = BEVERAGES[beverageSelect.value];
+  if (!selected || !selected.name) {
+    showMessage("Please select a beverage.", "warning");
+    return;
+  }
+  const qty = parseQty(beverageQty);
+  addItemToCart(selected, qty);
+  beverageSelect.value = 0;
+  beverageQty.value = 1;
+});
+
+addDessertBtn.addEventListener("click", () => {
+  const selected = DESSERTS[dessertSelect.value];
+  if (!selected || !selected.name) {
+    showMessage("Please select a dessert.", "warning");
+    return;
+  }
+  const qty = parseQty(dessertQty);
+  addItemToCart(selected, qty);
+  dessertSelect.value = 0;
+  dessertQty.value = 1;
+});
+
+// Update Live Summary UI
+function updateSummary() {
+  const customerName = customerSelect.value.trim();
+  const grandTotal = orderCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  priceDisplay.textContent = `$${grandTotal.toFixed(2)}`;
+
+  if (orderCart.length === 0) {
+    summaryContent.innerHTML = `<p class="text-secondary italic">Start selecting items to see order details here...</p>`;
+    return;
+  }
+
+  let html = `<div class="order-items-list">`;
+  if (customerName) {
+    html = `<div class="mb-3 text-warning fw-semibold"><i class="bi bi-person-circle me-1"></i> Customer: ${customerName}</div>` + html;
+  }
+
+  orderCart.forEach((item, index) => {
+    const itemTotal = item.price * item.quantity;
+    html += `
+      <div class="order-item-card">
+        <div class="order-item-row mb-1">
+          <span class="fw-bold">${item.name}</span>
+          <span class="fw-bold text-warning">$${itemTotal.toFixed(2)}</span>
+        </div>
+        ${item.details ? `<div class="small text-light opacity-75 mb-2">${item.details}</div>` : ''}
+        <div class="d-flex justify-content-between align-items-center mt-2 pt-1 border-top border-secondary border-opacity-25">
+          <span class="small text-secondary">$${item.price.toFixed(2)} each</span>
+          <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary btn-qty-sm" onclick="changeQuantity(${index}, -1)">-</button>
+            <span class="fw-bold px-1">${item.quantity}</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary btn-qty-sm" onclick="changeQuantity(${index}, 1)">+</button>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-qty-sm ms-2" onclick="removeItem(${index})"><i class="bi bi-trash-fill"></i></button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  summaryContent.innerHTML = html;
 }
 
-// event listeners for on click event of buttons and select
-view.addEventListener("click", viewOrder);
-clear.addEventListener("click", clearOrder);
-pizzaForm.addEventListener("submit", function (event) {
-  // Prevent the default form submission behavior
-  event.preventDefault();
-  // Call enterOrder function to create the Pizza instance
-  enterOrder();
-});
+// Modify item quantity directly from summary ticket
+window.changeQuantity = function(index, delta) {
+  if (!orderCart[index]) return;
+  const item = orderCart[index];
+  const newQty = item.quantity + delta;
+
+  if (newQty <= 0) {
+    removeItem(index);
+    return;
+  }
+
+  if (delta > 0) {
+    const itemTotalQty = getItemTotalQty(item.name);
+    if (itemTotalQty >= MAX_QTY_PER_ITEM) {
+      showMessage(`Cannot exceed maximum limit of ${MAX_QTY_PER_ITEM} for ${item.name}.`, "warning");
+      return;
+    }
+  }
+
+  item.quantity = newQty;
+  updateSummary();
+};
+
+// Remove item from summary ticket
+window.removeItem = function(index) {
+  if (orderCart[index]) {
+    orderCart.splice(index, 1);
+    updateSummary();
+  }
+};
+
+customerSelect.addEventListener("input", updateSummary);
+
+if (clearBtn) {
+  clearBtn.addEventListener("click", () => {
+    pizzaForm.reset();
+    orderCart = [];
+    document.querySelectorAll('#toppingSelectC input[type="checkbox"]').forEach((cb) => {
+      cb.checked = false;
+    });
+    sizeQty.value = 1;
+    dipQty.value = 1;
+    sideQty.value = 1;
+    beverageQty.value = 1;
+    dessertQty.value = 1;
+    showMessage("");
+    updateSummary();
+  });
+}
+
+// Form Submission / Checkout POST
+if (pizzaForm) {
+  pizzaForm.addEventListener("submit", function (event) {
+    event.preventDefault();
+    const customerName = customerSelect.value.trim();
+
+    if (!customerName) {
+      showMessage("Please enter your name to proceed.", "warning");
+      return;
+    }
+
+    if (orderCart.length === 0) {
+      showMessage("Please add at least one item before checking out.", "warning");
+      return;
+    }
+
+    const itemsPayload = orderCart.map((item, idx) => ({
+      id: idx + 1,
+      name: item.details ? `${item.name} (${item.details})` : item.name,
+      priceInCents: Math.round(item.price * 100),
+      quantity: item.quantity
+    }));
+
+    showMessage("Connecting to checkout...", "info");
+
+    fetch("/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        customerName,
+        items: itemsPayload
+      }),
+    })
+      .then((res) => {
+        if (res.ok) return res.json();
+        return res.json().then((json) => Promise.reject(json));
+      })
+      .then(({ url }) => {
+        window.location.href = url || "success.html";
+      })
+      .catch((e) => {
+        console.error("Checkout Error:", e);
+        window.location.href = "success.html";
+      });
+  });
+}

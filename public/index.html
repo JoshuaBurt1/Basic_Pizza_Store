@@ -2,61 +2,188 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Pizza Store Example</title>
+  <title>Bella Crust Pizzeria</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" defer></script>
-  <script src="index.js" defer></script>
+  <!-- Bootstrap 5 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   <link href="styles.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script src="index.js" defer></script>
 </head>
 <body>
+  <div class="bg-overlay"></div>
 
-  <div class="container1">
-    <form id="pizzaForm">
-      <header class="mb-4">
-        <h2>Pizza Store Example</h2>
-      </header>
+  <div class="container py-4 min-vh-100 d-flex flex-column justify-content-center">
+    <header class="text-center text-white mb-4">
+      <h1 class="display-5 fw-bold text-warning"><i class="bi bi-pie-chart-fill me-2"></i>Bella Crust Pizzeria</h1>
+      <p class="lead text-light opacity-75">Order your custom pizza, sides, drinks, and desserts online</p>
+    </header>
 
-      <!-- Part 3: Pizza options-->
-      <div class="mb-3">
-        <label for="customerSelect" class="form-label">Enter customer name</label>
-        <input type="text" class="form-control" id="customerSelect" name="customerName" placeholder="Enter your name">
+    <div class="row g-4 align-items-start">
+      <!-- Order Builder Form -->
+      <div class="col-lg-7">
+        <form id="pizzaForm" class="card shadow-lg border-0 bg-dark text-white rounded-4 p-4">
+          
+          <!-- Customer Details -->
+          <div class="mb-4">
+            <label for="customerSelect" class="form-label fw-semibold fs-5">
+              <i class="bi bi-person-fill text-warning me-1"></i> Customer Details
+            </label>
+            <input type="text" class="form-control form-control-lg bg-secondary text-white border-0" id="customerSelect" name="customerName" placeholder="Enter your full name" required>
+          </div>
+
+          <!-- Pizza Builder Section -->
+          <div class="mb-4 p-3 rounded-3 bg-dark-subtle border border-secondary border-opacity-25">
+            <label for="sizeSelect" class="form-label fw-semibold fs-5">
+              <i class="bi bi-disc text-warning me-1"></i> Build a Pizza
+            </label>
+            <div class="input-group input-group-lg mb-3">
+              <select class="form-select bg-secondary text-white border-0" id="sizeSelect" name="pizzaSize">
+                <!-- Dynamically populated sizes -->
+              </select>
+              <span class="input-group-text bg-secondary text-warning border-0 fs-6 fw-semibold">Qty</span>
+              <input type="number" id="sizeQty" class="form-control bg-secondary text-white border-0 text-center qty-input" value="1" min="1" max="5">
+            </div>
+
+            <!-- Toppings -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold fs-6 text-light opacity-75">
+                Select Pizza Toppings
+              </label>
+              <div id="toppingSelectC" class="d-flex flex-wrap gap-2 pt-1">
+                <!-- Dynamically populated topping chips -->
+              </div>
+            </div>
+
+            <button type="button" id="addPizzaBtn" class="btn btn-warning fw-bold text-dark w-100">
+              <i class="bi bi-plus-circle-fill me-1"></i> Add Pizza to Order
+            </button>
+          </div>
+
+          <!-- Dip & Side Selection -->
+          <div class="row g-3 mb-4">
+            <!-- Dips -->
+            <div class="col-md-6">
+              <div class="p-3 rounded-3 bg-dark-subtle border border-secondary border-opacity-25 h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <label for="dipSelect" class="form-label fw-semibold fs-5">
+                    <i class="bi bi-cup-hot-fill text-warning me-1"></i> Choose Dip
+                  </label>
+                  <div class="input-group input-group-lg mb-3">
+                    <select class="form-select bg-secondary text-white border-0" id="dipSelect" name="pizzaDip">
+                      <!-- Dynamically populated dips -->
+                    </select>
+                    <span class="input-group-text bg-secondary text-warning border-0 fs-6 fw-semibold">Qty</span>
+                    <input type="number" id="dipQty" class="form-control bg-secondary text-white border-0 text-center qty-input" value="1" min="1" max="5">
+                  </div>
+                </div>
+                <button type="button" id="addDipBtn" class="btn btn-outline-warning fw-semibold w-100">
+                  <i class="bi bi-plus-lg me-1"></i> Add Dip
+                </button>
+              </div>
+            </div>
+
+            <!-- Sides -->
+            <div class="col-md-6">
+              <div class="p-3 rounded-3 bg-dark-subtle border border-secondary border-opacity-25 h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <label for="sideSelect" class="form-label fw-semibold fs-5">
+                    <i class="bi bi-box-seam-fill text-warning me-1"></i> Choose Side
+                  </label>
+                  <div class="input-group input-group-lg mb-3">
+                    <select class="form-select bg-secondary text-white border-0" id="sideSelect" name="pizzaSide">
+                      <!-- Dynamically populated sides -->
+                    </select>
+                    <span class="input-group-text bg-secondary text-warning border-0 fs-6 fw-semibold">Qty</span>
+                    <input type="number" id="sideQty" class="form-control bg-secondary text-white border-0 text-center qty-input" value="1" min="1" max="5">
+                  </div>
+                </div>
+                <button type="button" id="addSideBtn" class="btn btn-outline-warning fw-semibold w-100">
+                  <i class="bi bi-plus-lg me-1"></i> Add Side
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Beverage & Dessert Selection -->
+          <div class="row g-3 mb-4">
+            <!-- Beverage -->
+            <div class="col-md-6">
+              <div class="p-3 rounded-3 bg-dark-subtle border border-secondary border-opacity-25 h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <label for="beverageSelect" class="form-label fw-semibold fs-5">
+                    <i class="bi bi-cup-straw text-warning me-1"></i> Choose Beverage
+                  </label>
+                  <div class="input-group input-group-lg mb-3">
+                    <select class="form-select bg-secondary text-white border-0" id="beverageSelect" name="pizzaBeverage">
+                      <!-- Dynamically populated beverages -->
+                    </select>
+                    <span class="input-group-text bg-secondary text-warning border-0 fs-6 fw-semibold">Qty</span>
+                    <input type="number" id="beverageQty" class="form-control bg-secondary text-white border-0 text-center qty-input" value="1" min="1" max="5">
+                  </div>
+                </div>
+                <button type="button" id="addBeverageBtn" class="btn btn-outline-warning fw-semibold w-100">
+                  <i class="bi bi-plus-lg me-1"></i> Add Beverage
+                </button>
+              </div>
+            </div>
+
+            <!-- Dessert -->
+            <div class="col-md-6">
+              <div class="p-3 rounded-3 bg-dark-subtle border border-secondary border-opacity-25 h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <label for="dessertSelect" class="form-label fw-semibold fs-5">
+                    <i class="bi bi-cookie text-warning me-1"></i> Choose Dessert
+                  </label>
+                  <div class="input-group input-group-lg mb-3">
+                    <select class="form-select bg-secondary text-white border-0" id="dessertSelect" name="pizzaDessert">
+                      <!-- Dynamically populated desserts -->
+                    </select>
+                    <span class="input-group-text bg-secondary text-warning border-0 fs-6 fw-semibold">Qty</span>
+                    <input type="number" id="dessertQty" class="form-control bg-secondary text-white border-0 text-center qty-input" value="1" min="1" max="5">
+                  </div>
+                </div>
+                <button type="button" id="addDessertBtn" class="btn btn-outline-warning fw-semibold w-100">
+                  <i class="bi bi-plus-lg me-1"></i> Add Dessert
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary btn-lg flex-grow-1 clear">
+              <i class="bi bi-trash-fill me-1"></i> Clear Order
+            </button>
+            <button type="submit" class="btn btn-warning btn-lg flex-grow-2 fw-bold text-dark pay">
+              <i class="bi bi-bag-check-fill me-1"></i> Checkout
+            </button>
+          </div>
+        </form>
       </div>
 
-      <div class="mb-3">
-        <label for="sizeSelect" class="form-label">Select Size</label>
-        <select class="form-select" id="sizeSelect" name="pizzaSize">
-          <option value="" disabled selected>Please choose...</option>
-        </select>
-      </div>
+      <!-- Live Order Summary Ticket -->
+      <div class="col-lg-5">
+        <div class="card shadow-lg border-0 bg-dark text-white rounded-4 p-4 sticky-top" style="top: 20px;">
+          <h3 class="h4 border-bottom border-secondary pb-3 text-warning">
+            <i class="bi bi-receipt me-2"></i> Live Order Summary
+          </h3>
 
-      <div id="toppingSelectC" class="mb-3">
-        <label class="form-label">Select Toppings</label><br />
-      </div>
+          <div id="summaryContent" class="my-3">
+            <p class="text-secondary italic">Start selecting items to see order details here...</p>
+          </div>
 
-      <div class="mb-3">
-        <label for="dipSelect" class="form-label">Select Dip</label>
-        <select class="form-select" id="dipSelect" name="pizzaDip">
-          <option value="" disabled selected>Please choose...</option>
-        </select>
+          <div class="border-top border-secondary pt-3 mt-auto">
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="fs-5 fw-semibold">Total Price:</span>
+              <span id="priceDisplay" class="fs-3 fw-bold text-warning">$0.00</span>
+            </div>
+            <p id="message" class="mt-2 text-info small mb-0"></p>
+          </div>
+        </div>
       </div>
-
-      <div class="mb-3">
-        <label for="sideSelect" class="form-label">Select Side</label>
-        <select class="form-select" id="sideSelect" name="pizzaSide">
-          <option value="" disabled selected>Please choose...</option>
-        </select>
-      </div>
-
-      <div class="mb-3">
-        <button type="button" class="btn btn-primary view">View Order</button>
-        <button type="reset" class="btn btn-secondary clear">Clear</button>
-        <button type="submit" class="btn btn-success pay">Checkout</button>
-      </div>
-
-      <p id="message" class="mb-3"></p>
-      <p id="price" class="mb-3"></p>
-    </form>
+    </div>
   </div>
 </body>
 </html>
