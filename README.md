@@ -1,24 +1,14 @@
-# eCommerce Example 1a (Express)
-basic store - multi-option product - payment via Stripe <br>
-https://pizza-store-example.onrender.com/index.html
+# 🍕 Bella Crust Pizzeria
 
-# To Start: <br>
-* Download zip, open in code editor
-* Download node.js
-* In terminal: npm init -y
-* Download dependencies: npm i cors dotenv express nodemon stripe
-* add .env file at root <br>
-STRIPE_SECRET_KEY="YOUR_SECRET_KEY" <br>
-* In terminal: node index.js
+An interactive, responsive full-stack online ordering web application for Bella Crust Pizzeria. Built with Node.js, Express, and Bootstrap 5, allowing customers to customize pizzas, select dips, sides, drinks, and desserts, and monitor their live order ticket with dynamically calculated totals and quantity controls.
 
-# Deployment to hosting site: <br>
-- when deploying to render, all instances of "http://localhost:3000" --> https://pizza-store-example.onrender.com
-- when deploying on a local instance, all instances of "https://pizza-store-example.onrender.com" --> "http://localhost:3000"
-- enter STRIPE_SECRET_KEY in deployment step --> no quotes around secret key
+---
 
-# Capabilities <br>
-~Stripe Payments <br>
+## 🌟 Features
 
-# To be Added: <br>
-* more content
-* more modular codebase
+* **Interactive Order Builder**: Custom pizza configuration with size options and toggleable topping chips.
+* **Multi-Item Cart System**: Dedicated "Add to Order" buttons for pizzas, dips, sides, beverages, and desserts.
+* **Live Order Ticket**: Real-time order summary updating instantly as items are added, modified, or removed.
+* **Quantity Limits & Controls**: Enforces a strict maximum limit of 5 units per item with inline `-` / `+` adjusters and individual item deletion.
+* **Responsive UI**: Custom dark-themed layout built with Bootstrap 5 and Bootstrap Icons.
+* **Checkout Integration**: Built-in POST handler (`/checkout`) ready for payment gateway redirects (e.g., Stripe Checkout).
