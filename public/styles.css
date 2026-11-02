@@ -124,6 +124,11 @@ body {
   border-radius: 0.375rem;
 }
 
+/* Footer Link Hover */
+.link-hover:hover {
+  text-decoration: underline !important;
+}
+
 /* Success Screen Specifics */
 .success-card {
   max-width: 540px;

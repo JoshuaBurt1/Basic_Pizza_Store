@@ -89,8 +89,28 @@ const priceDisplay = document.getElementById("priceDisplay");
 const message = document.getElementById("message");
 const clearBtn = document.querySelector(".clear");
 
+// Visit Counter Handler
+function handleVisitCounter() {
+  let visits = parseInt(localStorage.getItem("bella_crust_visits") || "0", 10);
+  
+  if (!sessionStorage.getItem("bella_crust_session_active")) {
+    visits += 1;
+    localStorage.setItem("bella_crust_visits", visits);
+    sessionStorage.setItem("bella_crust_session_active", "true");
+  } else if (visits === 0) {
+    visits = 1;
+    localStorage.setItem("bella_crust_visits", visits);
+  }
+
+  const visitEl = document.getElementById("visitCount");
+  if (visitEl) {
+    visitEl.textContent = visits;
+  }
+}
+
 // Populate Select Menus
 function populateSelect(element, items) {
+  if (!element) return;
   element.innerHTML = "";
   items.forEach((item, index) => {
     const opt = document.createElement("option");
@@ -102,6 +122,7 @@ function populateSelect(element, items) {
 
 // Populate Toppings
 function renderToppings() {
+  if (!toppingContainer) return;
   toppingContainer.innerHTML = "";
   TOPPINGS.forEach((topping) => {
     const chip = document.createElement("div");
@@ -115,7 +136,8 @@ function renderToppings() {
   });
 }
 
-// Init Options
+// Initialize Menu Elements & Visit Counter
+handleVisitCounter();
 populateSelect(sizeSelect, SIZES);
 populateSelect(dipSelect, DIPS);
 populateSelect(sideSelect, SIDES);
@@ -132,6 +154,7 @@ function parseQty(inputEl) {
 }
 
 function showMessage(msg, type = "info") {
+  if (!message) return;
   message.className = `mt-2 small mb-0 text-${type}`;
   message.textContent = msg;
 }
@@ -182,88 +205,100 @@ function addItemToCart(itemObj, quantity, details = "") {
 }
 
 // Button Event Listeners
-addPizzaBtn.addEventListener("click", () => {
-  const selectedSize = SIZES[sizeSelect.value];
-  if (!selectedSize || !selectedSize.name) {
-    showMessage("Please select a pizza size first.", "warning");
-    return;
-  }
+if (addPizzaBtn) {
+  addPizzaBtn.addEventListener("click", () => {
+    const selectedSize = SIZES[sizeSelect.value];
+    if (!selectedSize || !selectedSize.name) {
+      showMessage("Please select a pizza size first.", "warning");
+      return;
+    }
 
-  const selectedToppings = [];
-  TOPPINGS.forEach((t) => {
-    const cb = document.getElementById(t.id);
-    if (cb && cb.checked) selectedToppings.push(t);
+    const selectedToppings = [];
+    TOPPINGS.forEach((t) => {
+      const cb = document.getElementById(t.id);
+      if (cb && cb.checked) selectedToppings.push(t);
+    });
+
+    const toppingPrice = selectedToppings.reduce((sum, t) => sum + t.price, 0);
+    const pizzaUnitPrice = selectedSize.price + toppingPrice;
+    const qty = parseQty(sizeQty);
+    const toppingsText = selectedToppings.length > 0
+      ? selectedToppings.map(t => t.name).join(", ")
+      : "Plain Cheese";
+
+    addItemToCart(
+      { name: selectedSize.name, price: pizzaUnitPrice },
+      qty,
+      `Toppings: ${toppingsText}`
+    );
+
+    sizeSelect.value = 0;
+    sizeQty.value = 1;
+    document.querySelectorAll('#toppingSelectC input[type="checkbox"]').forEach(cb => cb.checked = false);
   });
+}
 
-  const toppingPrice = selectedToppings.reduce((sum, t) => sum + t.price, 0);
-  const pizzaUnitPrice = selectedSize.price + toppingPrice;
-  const qty = parseQty(sizeQty);
-  const toppingsText = selectedToppings.length > 0
-    ? selectedToppings.map(t => t.name).join(", ")
-    : "Plain Cheese";
+if (addDipBtn) {
+  addDipBtn.addEventListener("click", () => {
+    const selected = DIPS[dipSelect.value];
+    if (!selected || !selected.name) {
+      showMessage("Please select a dip.", "warning");
+      return;
+    }
+    const qty = parseQty(dipQty);
+    addItemToCart(selected, qty);
+    dipSelect.value = 0;
+    dipQty.value = 1;
+  });
+}
 
-  addItemToCart(
-    { name: selectedSize.name, price: pizzaUnitPrice },
-    qty,
-    `Toppings: ${toppingsText}`
-  );
+if (addSideBtn) {
+  addSideBtn.addEventListener("click", () => {
+    const selected = SIDES[sideSelect.value];
+    if (!selected || !selected.name) {
+      showMessage("Please select a side.", "warning");
+      return;
+    }
+    const qty = parseQty(sideQty);
+    addItemToCart(selected, qty);
+    sideSelect.value = 0;
+    sideQty.value = 1;
+  });
+}
 
-  sizeSelect.value = 0;
-  sizeQty.value = 1;
-  document.querySelectorAll('#toppingSelectC input[type="checkbox"]').forEach(cb => cb.checked = false);
-});
+if (addBeverageBtn) {
+  addBeverageBtn.addEventListener("click", () => {
+    const selected = BEVERAGES[beverageSelect.value];
+    if (!selected || !selected.name) {
+      showMessage("Please select a beverage.", "warning");
+      return;
+    }
+    const qty = parseQty(beverageQty);
+    addItemToCart(selected, qty);
+    beverageSelect.value = 0;
+    beverageQty.value = 1;
+  });
+}
 
-addDipBtn.addEventListener("click", () => {
-  const selected = DIPS[dipSelect.value];
-  if (!selected || !selected.name) {
-    showMessage("Please select a dip.", "warning");
-    return;
-  }
-  const qty = parseQty(dipQty);
-  addItemToCart(selected, qty);
-  dipSelect.value = 0;
-  dipQty.value = 1;
-});
-
-addSideBtn.addEventListener("click", () => {
-  const selected = SIDES[sideSelect.value];
-  if (!selected || !selected.name) {
-    showMessage("Please select a side.", "warning");
-    return;
-  }
-  const qty = parseQty(sideQty);
-  addItemToCart(selected, qty);
-  sideSelect.value = 0;
-  sideQty.value = 1;
-});
-
-addBeverageBtn.addEventListener("click", () => {
-  const selected = BEVERAGES[beverageSelect.value];
-  if (!selected || !selected.name) {
-    showMessage("Please select a beverage.", "warning");
-    return;
-  }
-  const qty = parseQty(beverageQty);
-  addItemToCart(selected, qty);
-  beverageSelect.value = 0;
-  beverageQty.value = 1;
-});
-
-addDessertBtn.addEventListener("click", () => {
-  const selected = DESSERTS[dessertSelect.value];
-  if (!selected || !selected.name) {
-    showMessage("Please select a dessert.", "warning");
-    return;
-  }
-  const qty = parseQty(dessertQty);
-  addItemToCart(selected, qty);
-  dessertSelect.value = 0;
-  dessertQty.value = 1;
-});
+if (addDessertBtn) {
+  addDessertBtn.addEventListener("click", () => {
+    const selected = DESSERTS[dessertSelect.value];
+    if (!selected || !selected.name) {
+      showMessage("Please select a dessert.", "warning");
+      return;
+    }
+    const qty = parseQty(dessertQty);
+    addItemToCart(selected, qty);
+    dessertSelect.value = 0;
+    dessertQty.value = 1;
+  });
+}
 
 // Update Live Summary UI
 function updateSummary() {
-  const customerName = customerSelect.value.trim();
+  if (!summaryContent || !priceDisplay) return;
+
+  const customerName = customerSelect ? customerSelect.value.trim() : "";
   const grandTotal = orderCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   priceDisplay.textContent = `$${grandTotal.toFixed(2)}`;
 
@@ -334,7 +369,9 @@ window.removeItem = function(index) {
   }
 };
 
-customerSelect.addEventListener("input", updateSummary);
+if (customerSelect) {
+  customerSelect.addEventListener("input", updateSummary);
+}
 
 if (clearBtn) {
   clearBtn.addEventListener("click", () => {
